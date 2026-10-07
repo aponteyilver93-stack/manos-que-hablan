@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Manos que hablan</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><meta name="theme-color" content="#0B1F3A">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#EEF4FF;--card:#fff;--tx:#0B1F3A;--ac:#FFD400;--ok:#2ECC71;--bad:#FF5252;--nav:#dbe7ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1F3A;--card:#16325C;--tx:#fff;--nav:#081529}}
+:root[data-theme="dark"]{--bg:#0B1F3A;--card:#16325C;--tx:#fff;--nav:#081529}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font-family:Arial,Helvetica,sans-serif;transition:background .3s,color .3s}
+#app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--nav);position:sticky;top:env(safe-area-inset-top,0px);z-index:2}
+header b{font-size:20px}
+#main{padding:6px 16px 20px;flex:1}
+h2{color:var(--ac);margin:14px 0 4px;font-size:26px}
+.sub{margin:0 0 6px;font-size:18px;opacity:.9}
+.card{background:var(--card);border-radius:18px;padding:16px;text-align:center;margin:10px 0;transition:background .3s}
+.big{font-size:64px;line-height:1.1}.word{font-size:34px;font-weight:700;color:var(--ac)}
+.desc{font-size:19px;line-height:1.35;margin:8px 0}
+button{font:700 19px Arial,sans-serif;background:var(--ac);color:#000;border:0;border-radius:14px;padding:14px;cursor:pointer}
+button:disabled{color:#000;opacity:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.tile{padding:22px 8px;font-size:20px}
+.mc{min-height:92px;font-size:28px;padding:6px}
+.mc.open{background:#fff;font-size:15px}.mc.sg{background:#CFE8FF;font-size:12px}
+.ok{background:var(--ok)!important}.bad{background:var(--bad)!important}
+.ghost{background:var(--card);color:var(--tx)}
+.out{background:var(--card);border-radius:14px;min-height:46px;padding:10px;text-align:center;font-size:26px;font-weight:700;color:var(--ac);margin:10px 0}
+input{width:100%;box-sizing:border-box;font-size:22px;padding:12px;border-radius:12px;border:2px solid var(--ac);background:var(--card);color:var(--tx);margin:6px 0;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:8px 4px;border-bottom:1px solid #4a6a9f;text-align:left}
+nav{display:flex;justify-content:space-around;background:var(--nav);padding:8px 4px;position:sticky;bottom:0}
+nav button{background:transparent;font-size:24px;padding:8px 12px;border-radius:12px;color:var(--tx)}
+nav button.on{background:#fff;color:#000}
+.stars{font-size:60px}
+</style></head><body>
+<div id="app"><header><b>🤟 Manos que hablan</b><button class="ghost" id="th" style="padding:6px 12px">🌙</button></header><div id="main"></div><nav id="nav" hidden></nav></div>
+<script>
+const SIGNS=[["hola","👋","Mueve la mano abierta de lado a lado, como saludando."],["adiós","🖐️","Abre y cierra la mano frente a ti, como despidiéndote."],["gracias","🙏","Lleva la mano plana desde la barbilla hacia adelante."],["por favor","🤲","Frota la palma de la mano sobre tu pecho en círculos."],["perdón","😔","Frota el puño cerrado sobre tu pecho en círculos."],["sí","👍","Mueve el puño cerrado arriba y abajo, como cabeceando."],["no","🙅","Mueve el dedo índice de lado a lado."],["bien","👌","Une pulgar e índice en círculo y estira los otros dedos."],["mal","👎","Cierra el puño y apunta el pulgar hacia abajo."],["ayuda","🆘","Pon un puño sobre la palma de la otra mano y súbelas juntas."],
+["yo","🙋","Señala tu pecho con el dedo índice."],["tú","🫵","Señala con el dedo índice a la otra persona."],["mamá","👩","Toca la barbilla con el pulgar de la mano abierta."],["papá","👨","Toca la frente con el pulgar de la mano abierta."],["bebé","👶","Mece los brazos como si cargaras un bebé."],["amigo","🤝","Engancha los dedos índices de ambas manos."],["maestro","🧑‍🏫","Mueve las manos abiertas desde la frente hacia adelante."],
+["comer","🍽️","Junta los dedos y llévalos a la boca varias veces."],["beber","🥤","Forma una C con la mano y llévala a la boca, inclinándola."],["dormir","😴","Apoya la mano abierta en la mejilla e inclina la cabeza."],["jugar","🎮","Agita las manos con pulgares y meñiques extendidos."],["correr","🏃","Mueve los brazos doblados adelante y atrás, como corriendo."],["leer","📖","Con dos dedos 'lee' sobre la palma de la otra mano."],["escribir","✍️","Finge escribir con un lápiz sobre la palma de la otra mano."],["caminar","🚶","Mueve dos dedos como piernas caminando sobre la palma."],["ver","👀","Lleva dos dedos desde los ojos hacia afuera."],["querer","🤗","Lleva las manos abiertas hacia ti cerrando los dedos."],
+["casa","🏠","Une las puntas de las manos formando un techo."],["escuela","🏫","Aplaude suavemente dos veces."],["libro","📚","Junta las palmas y ábrelas como un libro."],["agua","💧","Toca la barbilla con tres dedos extendidos, como una W."],["pan","🍞","Con una mano 'corta' el dorso de la otra, como rebanando pan."],["leche","🥛","Abre y cierra el puño, como ordeñando."],["pelota","⚽","Curva ambas manos como sosteniendo una pelota."],["carro","🚗","Mueve las manos como si manejaras un volante."],["sol","☀️","Dibuja un círculo sobre tu cabeza y abre los dedos hacia abajo."],["luna","🌙","Forma una C con la mano y súbela, como una luna creciente."],
+["perro","🐶","Da palmadas suaves en el muslo, como llamando a un perro."],["gato","🐱","Estira los dedos junto a la mejilla, como bigotes."],["pájaro","🐦","Abre y cierra pulgar e índice frente a la boca, como un pico."],["pez","🐟","Mueve la mano plana de lado a lado, como un pez nadando."],
+["feliz","😊","Sube la mano abierta por el pecho con una sonrisa."],["triste","😢","Baja la mano abierta frente a la cara con gesto triste."],["enojado","😠","Curva los dedos frente a la cara, como garras, con gesto de enojo."],["miedo","😨","Lleva las manos abiertas al pecho con gesto de susto."],["amor","❤️","Cruza los brazos sobre el pecho, como un abrazo."],["frío","🥶","Abraza tu cuerpo con los puños cerrados, temblando."],["calor","🥵","Abanica tu cara con la mano."],
+["uno","1️⃣","Levanta el dedo índice."],["dos","2️⃣","Levanta los dedos índice y medio."],["tres","3️⃣","Levanta los dedos índice, medio y anular."]];
+const KEY='mqh_v1';let DB;try{DB=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+DB=DB||{signs:SIGNS.map(([w,p,d])=>({w,p,d})),users:{}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}};
+let signs=DB.signs,PH=["hola amigo","yo comer:como","tú beber:bebes","yo dormir:duermo","gracias amigo","yo feliz:estoy_feliz","yo querer:quiero agua","yo querer:quiero comer","yo leer:leo libro","tú jugar:juegas pelota","yo ver:veo perro","mamá dormir:duerme","papá ver:ve carro","yo caminar:camino","tú escribir:escribes","yo beber:bebo agua","yo correr:corro"],user=null,log=[];
+const main=document.getElementById('main'),nav=document.getElementById('nav');
+const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pic=w=>(signs.find(s=>s.w===w)||{}).p||'❔';
+const NAV=[['menu','🏠'],['learn','📖'],['memory','🧠'],['trivia','❓'],['phrases','🧩'],['progress','⭐']];
+function go(v){const f=window[v];if(!user&&v!=='login'&&v!=='teacher')v='login';
+  nav.hidden=!user||v==='login'||v==='teacher';
+  nav.innerHTML=NAV.map(([k,i])=>`<button class="${k===v?'on':''}" onclick="go('${k}')">${i}</button>`).join('');
+  window[v]();scrollTo(0,0)}
+const VID=/\.(mp4|webm)$/i,ST='max-width:100%;max-height:240px;border-radius:12px;display:block;margin:0 auto 8px';
+const slug=w=>w.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_').toLowerCase();
+const media=s=>`<div class=md data-c='${esc(JSON.stringify(['gif','png','jpg','webp','mp4'].map(e=>'senas/'+slug(s.w)+'.'+e)))}'></div>`;
+function loadMedia(){main.querySelectorAll('.md').forEach(d=>{const c=JSON.parse(d.dataset.c);let k=0;const t=()=>{if(k>=c.length)return;const u=c[k++];
+  if(VID.test(u)){const v=document.createElement('video');Object.assign(v,{autoplay:true,loop:true,muted:true,playsInline:true,controls:true});v.style.cssText=ST;v.onloadeddata=()=>d.appendChild(v);v.onerror=t;v.src=u}
+  else{const im=new Image();im.alt='Seña';im.style.cssText=ST;im.onload=()=>d.appendChild(im);im.onerror=t;im.src=u}};t()})}
+function login(){user=null;nav.hidden=true;
+  main.innerHTML=`<div class=card style="margin-top:24px"><div class=big>🤟</div><h2>¡Bienvenido!</h2><p class=desc>Aprende señas jugando</p></div>
+  <p class=sub style="text-align:center">¿Cómo te llamas?</p><input id=nm placeholder="Tu nombre" maxlength=20>
+  <button style="width:100%;margin-top:8px;background:var(--ok)" id=go>▶ Entrar</button>
+  <button class=ghost style="width:100%;margin-top:30px;font-size:15px" onclick="go('teacher')">👩‍🏫 Panel docente</button>`;
+  const e=()=>{const n=document.getElementById('nm').value.trim();if(n){user=n;log=DB.users[n]=DB.users[n]||[];save();go('menu')}};
+  document.getElementById('go').onclick=e;document.getElementById('nm').onkeydown=k=>k.key==='Enter'&&e()}
+function menu(){main.innerHTML=`<h2>¡Hola, ${esc(user)}!</h2><p class=sub>¿Qué quieres hacer?</p><div class=grid style="margin-top:12px">
+  ${[['learn','📖 Aprender señas'],['memory','🧠 Memoria'],['trivia','❓ Trivia'],['phrases','🧩 Armar frases'],['progress','⭐ Mi progreso']].map(([k,t])=>`<button class=tile onclick="go('${k}')">${t}</button>`).join('')}
+  <button class="tile ghost" onclick="login()">🚪 Salir</button></div>`}
+function learn(){let i=0;const f=()=>{const s=signs[i];
+  main.innerHTML=`<h2>Aprender señas</h2><p class=sub>${i+1} de ${signs.length}</p><div class=card>${media(s)}<div class=big>${s.p}</div><div class=word>${esc(s.w.toUpperCase())}</div><p class=desc>🤟 ${esc(s.d)}</p></div>
+  <div class=row><button id=pv>⬅ Anterior</button><button id=nx>Siguiente ➡</button></div>`;
+  loadMedia();pv.onclick=()=>{i=(i+signs.length-1)%signs.length;f()};nx.onclick=()=>{i=(i+1)%signs.length;f()}};f()}
+function memory(){const p=sh(signs).slice(0,4),c=sh(p.flatMap(s=>[{k:s.w,t:'p',s},{k:s.w,t:'s',s}]));let sel=[],ok=0,tries=0,lock=false;
+  main.innerHTML=`<h2>Memoria</h2><p class=sub>Une el dibujo con su seña</p><div class=grid>${c.map(()=>'<button class=mc>❓</button>').join('')}</div>`;
+  const B=[...main.querySelectorAll('.mc')];
+  const show=i=>{const x=c[i];B[i].className='mc open'+(x.t==='s'?' sg':'');B[i].innerHTML=x.t==='p'?`<span style="font-size:32px">${x.s.p}</span><br>${esc(x.s.w)}`:'🤟 '+esc(x.s.d)};
+  B.forEach((b,i)=>b.onclick=()=>{if(lock||b.disabled||sel.includes(i))return;show(i);sel.push(i);if(sel.length<2)return;tries++;const[a,d]=sel;
+    if(c[a].k===c[d].k){[a,d].forEach(j=>{B[j].disabled=true;B[j].classList.add('ok')});sel=[];if(++ok===c.length/2)setTimeout(()=>end('Memoria',ok,tries,memory),700)}
+    else{lock=true;setTimeout(()=>{[a,d].forEach(j=>{B[j].textContent='❓';B[j].className='mc'});sel=[];lock=false},1000)}})}
+function trivia(){const q=sh(signs).slice(0,5);let i=0,ok=0;const f=()=>{const s=q[i],o=sh([s,...sh(signs.filter(x=>x!==s)).slice(0,3)]);
+  main.innerHTML=`<h2>Trivia ${i+1}/${q.length}</h2><p class=sub>¿Qué palabra es esta seña?</p><div class=card>${media(s)}<p class=desc style="font-size:22px">🤟 ${esc(s.d)}</p></div>
+  <div class=grid>${o.map(x=>`<button class=tile>${x.p} ${esc(x.w)}</button>`).join('')}</div>`;
+  const B=[...main.querySelectorAll('.tile')];loadMedia();
+  B.forEach((b,j)=>b.onclick=()=>{B.forEach((y,k)=>{y.disabled=true;if(o[k]===s)y.classList.add('ok')});if(o[j]===s)ok++;else b.classList.add('bad');
+    setTimeout(()=>{++i<q.length?f():end('Trivia',ok,q.length,trivia)},1100)})};f()}
+const tok=t=>{const[w,f]=t.split(':');return{w,f:(f||w).replace(/_/g,' ')}};
+const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+function phrases(){const ph=sh(PH).slice(0,3).map(t=>t.split(' ').map(tok));let i=0,ok=0;const f=()=>{const m=ph[i],ws=sh(m);let sel=[];
+  main.innerHTML=`<h2>Arma la frase ${i+1}/${ph.length}</h2><p class=sub>Toca las palabras en el orden de los dibujos</p>
+  <div class=card><div class=big style="font-size:40px">${m.map(t=>pic(t.w)).join(' ➜ ')}</div></div><div class=out id=out>&nbsp;</div>
+  <div class=row>${ws.map(t=>`<button class=opt>${pic(t.w)} ${esc(t.f)}</button>`).join('')}</div>`;
+  const B=[...main.querySelectorAll('.opt')],out=document.getElementById('out');
+  B.forEach((b,j)=>b.onclick=()=>{b.disabled=true;sel.push(ws[j]);out.textContent=cap(sel.map(t=>t.f).join(' '));
+    if(sel.length===m.length){const k=a=>a.map(t=>t.w+t.f).join('|'),good=k(sel)===k(m);out.classList.add(good?'ok':'bad');out.style.color='#000';if(good){ok++;out.textContent+='.'}
+      setTimeout(()=>{if(!good)return f();++i<ph.length?f():end('Frases',ok,ph.length,phrases)},1300)}})};f()}
+function end(a,p,t,again){log.unshift({a,p,t,d:new Date().toLocaleString('es-VE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})});save();
+  const pc=t?100*p/t:0;main.innerHTML=`<div class=card style="margin-top:24px"><h2>¡Muy bien, ${esc(user)}!</h2><div class=stars>${'⭐'.repeat(pc>=80?3:pc>=50?2:1)}</div>
+  <p class=desc>${a}: ${p} de ${t} (${pc.toFixed(0)}%)</p></div><button style="width:100%;background:var(--ok);margin-bottom:10px" id=ag>🔁 Jugar otra vez</button><button class=ghost style="width:100%" onclick="go('menu')">🏠 Menú</button>`;
+  document.getElementById('ag').onclick=again}
+function progress(){main.innerHTML=`<h2>⭐ Mi progreso</h2>`+(log.length?`<div class=card><table><tr><th>Hora</th><th>Actividad</th><th>Resultado</th></tr>${log.map(r=>`<tr><td>${r.d}</td><td>${r.a}</td><td>${r.p}/${r.t} (${(100*r.p/r.t).toFixed(0)}%)</td></tr>`).join('')}</table></div>`:`<div class=card><p class=desc>Aún no has jugado. ¡Prueba una actividad!</p></div>`)}
+function teacher(){nav.hidden=true;
+  main.innerHTML=`<h2>👩‍🏫 Panel docente</h2><p class=sub>Ingresa el PIN (demo: 1234)</p><input id=pin type=password inputmode=numeric maxlength=6><button style="width:100%" id=ok>Entrar</button><button class=ghost style="width:100%;margin-top:10px" onclick="login()">⬅ Volver</button>`;
+  document.getElementById('ok').onclick=()=>document.getElementById('pin').value==='1234'?panel():(document.getElementById('pin').style.borderColor='var(--bad)')}
+function panel(){main.innerHTML=`<h2>👩‍🏫 Panel docente</h2><div class=card><b>📚 Señas (${signs.length})</b><table>${signs.map((s,i)=>`<tr><td>${s.p} ${esc(s.w)}</td><td><button class=bad style="padding:4px 10px;font-size:14px" data-i=${i}>🗑</button></td></tr>`).join('')}</table></div>
+  <div class=card><b>➕ Nueva seña</b><input id=nw placeholder="Palabra"><input id=np placeholder="Emoji (🤟)"><input id=nd placeholder="Cómo se hace la seña"><button style="width:100%" id=add>Agregar</button></div>
+  <div class=card><b>📊 Progreso del grupo</b><table><tr><th>Alumno</th><th>Actividades</th><th>Promedio</th></tr>${Object.entries(DB.users).map(([n,l])=>`<tr><td>${esc(n)}</td><td>${l.length}</td><td>${l.length?(l.reduce((a,r)=>a+100*r.p/r.t,0)/l.length).toFixed(0)+'%':'-'}</td></tr>`).join('')}</table>
+  <button class=ghost style="width:100%;margin-top:10px" id=csv>📄 Exportar CSV</button></div><button class=ghost style="width:100%" onclick="${user?"go('menu')":'login()'}">⬅ Salir</button>`;
+  main.querySelectorAll('td button').forEach(b=>b.onclick=()=>{signs.splice(+b.dataset.i,1);save();panel()});
+  document.getElementById('csv').onclick=exportCSV;
+  document.getElementById('add').onclick=()=>{const w=nw.value.trim().toLowerCase(),d=nd.value.trim();if(w&&d){signs.push({w,p:np.value.trim()||'🤟',d});save();panel()}}}
+function exportCSV(){const r=[['Estudiante','Actividad','Puntaje','Total','Fecha']];Object.entries(DB.users).forEach(([n,l])=>l.forEach(x=>r.push([n,x.a,x.p,x.t,x.d])));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+r.map(x=>x.join(';')).join('\n')],{type:'text/csv'}));a.download='reporte_progreso.csv';a.click()}
+const th=document.getElementById('th');
+function setTheme(t){document.documentElement.dataset.theme=t;th.textContent=t==='dark'?'🌙':'☀️'}
+th.onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+setTheme('dark');login();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
